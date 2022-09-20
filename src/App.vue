@@ -131,7 +131,7 @@ function getStockSimulation() {
     // 如果是加碼日，用剩餘現金買進股票
     if (stockItem.bonusDay) {
       const isBonusDay = stockItem.bonusDay.includes(date);
-      if (isBonusDay) {
+      if (isBonusDay && fixedDepositMoney) {
         fixedDepositStockAmount += formatStockAmount(
           fixedDepositMoney / (prize * 1000)
         );
