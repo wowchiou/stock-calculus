@@ -2,6 +2,9 @@ import prize0056 from '@/data/prize0056.json';
 import prize0050 from '@/data/prize0050.json';
 import prize00878 from '@/data/prize00878.json';
 import prize00713 from '@/data/prize00713.json';
+import prize006208 from '@/data/prize006208.json';
+import prize2812 from '@/data/prize2812.json';
+import prize2834 from '@/data/prize2834.json';
 import prize2880 from '@/data/prize2880.json';
 import prize2881 from '@/data/prize2881.json';
 import prize2882 from '@/data/prize2882.json';
@@ -23,6 +26,7 @@ const stockList = [
     label: '0050 元大台灣50',
     list: prize0050.prize.reverse(),
     cashDividend: prize0050.cashDividend,
+    bonusDay: prize0050.bonusDay,
   },
   {
     id: '00878',
@@ -35,6 +39,24 @@ const stockList = [
     label: '00713 元大台灣高息低波',
     list: prize00713.prize.reverse(),
     cashDividend: prize00713.cashDividend,
+  },
+  {
+    id: '006208',
+    label: '006208 富邦台50',
+    list: prize006208.prize.reverse(),
+    cashDividend: prize006208.cashDividend,
+  },
+  {
+    id: '2812',
+    label: '2812 台中銀',
+    list: prize2812.prize.reverse(),
+    cashDividend: prize2812.cashDividend,
+  },
+  {
+    id: '2834',
+    label: '2834 台企銀',
+    list: prize2834.prize.reverse(),
+    cashDividend: prize2834.cashDividend,
   },
   {
     id: '2880',

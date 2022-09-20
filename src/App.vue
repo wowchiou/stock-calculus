@@ -128,6 +128,27 @@ function getStockSimulation() {
       });
     }
 
+    // 如果是加碼日，用剩餘現金買進股票
+    if (stockItem.bonusDay) {
+      const isBonusDay = stockItem.bonusDay.includes(date);
+      if (isBonusDay) {
+        fixedDepositStockAmount += formatStockAmount(
+          fixedDepositMoney / (prize * 1000)
+        );
+        fixedDepositList.value.unshift({
+          date,
+          prize,
+          status: '加碼日',
+          stockAmount: fixedDepositStockAmount,
+          action: formatStockAmount(fixedDepositMoney / (prize * 1000)),
+          money: 0,
+          totalStockValue: Math.floor(prize * 1000 * fixedDepositStockAmount),
+          totalMoney: Math.floor(fixedDepositStockAmount * (prize * 1000)),
+        });
+        fixedDepositMoney = 0;
+      }
+    }
+
     if (cashDividendItem) {
       money += Math.floor(cashDividendItem.cashDividend * 1000 * stockAmount);
       if (cashDividendItem.stockDividend) {
@@ -237,11 +258,14 @@ function formatStockAmount(number, fixed) {
 .form {
   margin-bottom: 20px;
 }
+.form label {
+  display: block;
+}
 .form label + label {
-  margin-left: 10px;
+  margin-top: 10px;
 }
 .form button {
-  margin-left: 10px;
+  margin-top: 10px;
 }
 .tables {
   display: flex;
