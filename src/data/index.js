@@ -1,8 +1,12 @@
 import prize0056 from '@/data/prize0056.json';
 import prize0050 from '@/data/prize0050.json';
+import prize0052 from '@/data/prize0052.json';
+import prize0055 from '@/data/prize0055.json';
 import prize00878 from '@/data/prize00878.json';
 import prize00713 from '@/data/prize00713.json';
+import prize00701 from '@/data/prize00701.json';
 import prize006208 from '@/data/prize006208.json';
+import prize006203 from '@/data/prize006203.json';
 import prize2812 from '@/data/prize2812.json';
 import prize2834 from '@/data/prize2834.json';
 import prize2880 from '@/data/prize2880.json';
@@ -22,6 +26,18 @@ const stockList = [
     cashDividend: prize0056.cashDividend,
   },
   {
+    id: '0052',
+    label: '0052 富邦科技',
+    list: prize0052.prize.reverse(),
+    cashDividend: prize0052.cashDividend,
+  },
+  {
+    id: '0055',
+    label: '0055 元大MSCI金融',
+    list: prize0055.prize.reverse(),
+    cashDividend: prize0055.cashDividend,
+  },
+  {
     id: '0050',
     label: '0050 元大台灣50',
     list: prize0050.prize.reverse(),
@@ -39,6 +55,18 @@ const stockList = [
     label: '00713 元大台灣高息低波',
     list: prize00713.prize.reverse(),
     cashDividend: prize00713.cashDividend,
+  },
+  {
+    id: '00701',
+    label: '00701 國泰股利精選30',
+    list: prize00701.prize.reverse(),
+    cashDividend: prize00701.cashDividend,
+  },
+  {
+    id: '006203',
+    label: '006203 元大MSCI台灣',
+    list: prize006203.prize.reverse(),
+    cashDividend: prize006203.cashDividend,
   },
   {
     id: '006208',

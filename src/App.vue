@@ -239,10 +239,10 @@ function formatStockAmount(number, fixed) {
     </div>
     <div>總投資金額： {{ totalInvest }}</div>
     <div class="tables">
-      <div class="table">
+      <!-- <div class="table">
         <p>雙幣理論</p>
         <StockDataTable :stockList="twoCoinList" />
-      </div>
+      </div> -->
       <div class="table">
         <p>每月定存</p>
         <StockDataTable :stockList="fixedDepositList" />
