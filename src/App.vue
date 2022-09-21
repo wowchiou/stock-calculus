@@ -85,9 +85,9 @@ function setComparisonStocks() {
     const stockData = getStockSimulation(stockId).fixedDepositList;
     if (index === 0) {
       datasets.push({
-        label: '累計投入資金',
-        backgroundColor: 'rgb(255, 0, 0)',
-        borderColor: 'rgb(255, 0, 0)',
+        label: '總投入資金',
+        backgroundColor: 'rgb(100, 100, 100)',
+        borderColor: 'rgb(100, 100, 100)',
         data: stockData.map((itm) => itm.investMoney).reverse(),
       });
     }
