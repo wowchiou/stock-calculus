@@ -1,26 +1,142 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, watchEffect, nextTick } from 'vue';
+import Chart from 'chart.js/auto';
 import dataList from '@/data';
 import StockDataTable from '@/components/StockDataTable.vue';
 
+const myChartRef = ref(null);
+const stocksRef = ref(null);
 const stock = ref('0056');
+const comparisonStocks = ref(['0050', '0056']);
 const twoCoinList = ref([]);
 const fixedDepositList = ref([]);
-const startMoney = ref(650000);
+const startMoney = ref(300000);
 const investMoney = ref(30000);
 const buyRate = ref(0.05);
 const saleRate = ref(0.05);
 const totalInvest = ref(0);
 const depositRate = ref(1);
-let money = 650000;
-let fixedDepositMoney = 0;
-let fixedDepositStockAmount = 0;
-let stockAmount = 0;
-let nowMonth = '';
 
-function getStockSimulation() {
-  money = startMoney.value;
-  const stockItem = dataList.find((itm) => itm.id === stock.value);
+let chart = null;
+let comparisonStocksChart = null;
+
+watch(stocksRef, (newValue, oldValue) => {
+  if (newValue !== oldValue) setComparisonStocks();
+});
+
+function setComparisonStocks() {
+  if (!comparisonStocks.value || !comparisonStocks.value.length) return;
+  if (comparisonStocksChart) comparisonStocksChart.destroy();
+  const datasets = [];
+  const stocksDataList = comparisonStocks.value.map((stockId, index) => {
+    const stockData = getStockSimulation(stockId).fixedDepositList;
+    if (index === 0) {
+      datasets.push({
+        label: '累計投入資金',
+        backgroundColor: 'rgb(255, 0, 0)',
+        borderColor: 'rgb(255, 0, 0)',
+        data: stockData.map((itm) => itm.investMoney).reverse(),
+      });
+    }
+    const color = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(
+      Math.random() * 255
+    )}, 255)`;
+    datasets.push({
+      label: dataList.find((itm) => itm.id === stockId).label,
+      backgroundColor: color,
+      borderColor: color,
+      data: stockData.map((itm) => itm.totalMoney).reverse(),
+    });
+    return {
+      id: stockId,
+      data: stockData,
+    };
+  });
+  comparisonStocksChart = new Chart(stocksRef.value, {
+    type: 'line',
+    data: {
+      labels: stocksDataList[0].data.map((itm) => itm.date).reverse(),
+      datasets,
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: '定期定額比較表',
+        },
+      },
+    },
+  });
+}
+
+watchEffect(async () => {
+  if (!fixedDepositList.value.length && !twoCoinList.length) return;
+  await nextTick();
+  if (chart) chart.destroy();
+  chart = new Chart(myChartRef.value, {
+    type: 'line',
+    data: {
+      labels: fixedDepositList.value.map((itm) => itm.date).reverse(),
+      datasets: [
+        {
+          label: '股票總價值',
+          backgroundColor: 'rgb(255, 99, 132)',
+          borderColor: 'rgb(255, 99, 132)',
+          data: fixedDepositList.value.map((itm) => itm.totalMoney).reverse(),
+          yAxisID: 'y',
+        },
+        {
+          label: '股價',
+          backgroundColor: 'rgb(25, 99, 255)',
+          borderColor: 'rgb(25, 99, 255)',
+          data: fixedDepositList.value.map((itm) => itm.prize).reverse(),
+          yAxisID: 'y1',
+        },
+        {
+          label: '總投入資金',
+          backgroundColor: 'rgb(100, 100, 100)',
+          borderColor: 'rgb(100, 100, 100)',
+          data: fixedDepositList.value.map((itm) => itm.investMoney).reverse(),
+          yAxisID: 'y',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: dataList.find((itm) => itm.id === stock.value).label,
+        },
+      },
+    },
+  });
+});
+
+function getStockSimulation(stockId) {
+  let money = startMoney.value;
+  let fixedDepositMoney = 0;
+  let fixedDepositStockAmount = 0;
+  let stockAmount = 0;
+  let nowMonth = '';
+  let fixedDepositList = [];
+  let twoCoinList = [];
+  const stockItem = dataList.find((itm) => itm.id === stockId);
   stockItem.list.forEach(({ date, prize }, idx) => {
     const [year, month, day] = date.split('/');
 
@@ -36,7 +152,7 @@ function getStockSimulation() {
       totalInvest.value = startMoney.value;
       money = startMoney.value * 0.5;
       stockAmount = formatStockAmount(money / (prize * 1000));
-      twoCoinList.value = [
+      twoCoinList = [
         {
           date,
           prize,
@@ -48,12 +164,11 @@ function getStockSimulation() {
           totalMoney: Math.floor(money + stockAmount * (prize * 1000)),
         },
       ];
-
       fixedDepositMoney = startMoney.value * (1 - fixedDepositMoneyRate);
       fixedDepositStockAmount = formatStockAmount(
         (startMoney.value * fixedDepositMoneyRate) / (prize * 1000)
       );
-      fixedDepositList.value = [
+      fixedDepositList = [
         {
           date,
           prize,
@@ -65,6 +180,7 @@ function getStockSimulation() {
           totalMoney: Math.floor(
             fixedDepositMoney + fixedDepositStockAmount * (prize * 1000)
           ),
+          investMoney: totalInvest.value,
         },
       ];
       return;
@@ -85,21 +201,21 @@ function getStockSimulation() {
           ((cashDividendItem.stockDividend / 10) * 1000 * originStockAmount) /
           1000;
       }
-      fixedDepositList.value.unshift({
-        date,
-        prize,
-        status: `股息${cashDividendMoney} 股票${(
-          ((cashDividendItem.stockDividend / 10) * 1000 * originStockAmount) /
-          1000
-        ).toFixed(2)}`,
-        stockAmount: fixedDepositStockAmount,
-        action: '',
-        money: fixedDepositMoney,
-        totalStockValue: Math.floor(prize * 1000 * fixedDepositStockAmount),
-        totalMoney: Math.floor(
-          fixedDepositMoney + fixedDepositStockAmount * (prize * 1000)
-        ),
-      });
+      // fixedDepositList.unshift({
+      //   date,
+      //   prize,
+      //   status: `股息${cashDividendMoney} 股票${(
+      //     ((cashDividendItem.stockDividend / 10) * 1000 * originStockAmount) /
+      //     1000
+      //   ).toFixed(2)}`,
+      //   stockAmount: fixedDepositStockAmount,
+      //   action: '',
+      //   money: fixedDepositMoney,
+      //   totalStockValue: Math.floor(prize * 1000 * fixedDepositStockAmount),
+      //   totalMoney: Math.floor(
+      //     fixedDepositMoney + fixedDepositStockAmount * (prize * 1000)
+      //   ),
+      // });
     }
 
     // 每月投資資金
@@ -112,7 +228,7 @@ function getStockSimulation() {
       fixedDepositStockAmount += formatStockAmount(
         (investMoney.value * fixedDepositMoneyRate) / (prize * 1000)
       );
-      fixedDepositList.value.unshift({
+      fixedDepositList.unshift({
         date,
         prize,
         status: 'buy',
@@ -125,9 +241,11 @@ function getStockSimulation() {
         totalMoney: Math.floor(
           fixedDepositMoney + fixedDepositStockAmount * (prize * 1000)
         ),
+        investMoney: totalInvest.value,
       });
     }
 
+    // 雙幣理論
     // 如果是加碼日，用剩餘現金買進股票
     if (stockItem.bonusDay) {
       const isBonusDay = stockItem.bonusDay.includes(date);
@@ -135,7 +253,7 @@ function getStockSimulation() {
         fixedDepositStockAmount += formatStockAmount(
           fixedDepositMoney / (prize * 1000)
         );
-        fixedDepositList.value.unshift({
+        fixedDepositList.unshift({
           date,
           prize,
           status: '加碼日',
@@ -144,6 +262,7 @@ function getStockSimulation() {
           money: 0,
           totalStockValue: Math.floor(prize * 1000 * fixedDepositStockAmount),
           totalMoney: Math.floor(fixedDepositStockAmount * (prize * 1000)),
+          investMoney: totalInvest.value,
         });
         fixedDepositMoney = 0;
       }
@@ -167,7 +286,7 @@ function getStockSimulation() {
       const moneyRange = (money - totalStockValue) / 2;
       money -= moneyRange;
       stockAmount += formatStockAmount(moneyRange / stockValue);
-      twoCoinList.value.unshift({
+      twoCoinList.unshift({
         date,
         prize,
         status: 'buy',
@@ -184,7 +303,7 @@ function getStockSimulation() {
       const moneyRange = (totalStockValue - money) / 2;
       money += moneyRange;
       stockAmount -= formatStockAmount(moneyRange / stockValue);
-      twoCoinList.value.unshift({
+      twoCoinList.unshift({
         date,
         prize,
         status: 'sale',
@@ -196,6 +315,16 @@ function getStockSimulation() {
       });
     }
   });
+  return {
+    twoCoinList,
+    fixedDepositList,
+  };
+}
+
+function handleSubmit(stockId) {
+  const list = getStockSimulation(stockId);
+  twoCoinList.value = list.twoCoinList;
+  fixedDepositList.value = list.fixedDepositList;
 }
 
 function formatStockAmount(number, fixed) {
@@ -206,60 +335,108 @@ function formatStockAmount(number, fixed) {
 
 <template>
   <div class="app">
+    <div class="compare">
+      <p>欲比較股票</p>
+      <el-select
+        v-model="comparisonStocks"
+        :style="{ width: '100%' }"
+        multiple
+        placeholder="請選擇股票"
+      >
+        <el-option
+          v-for="item in dataList"
+          :key="item.id"
+          :label="item.label"
+          :value="item.id"
+        />
+      </el-select>
+      <el-button type="primary" @click="setComparisonStocks">比對</el-button>
+    </div>
+    <canvas ref="stocksRef" id="stocksRef"></canvas>
+    <hr />
     <div class="form">
       <label>
         股票代碼
-        <select v-model="stock">
-          <option v-for="itm in dataList" :key="itm.id" :value="itm.id">
+        <el-select v-model="stock">
+          <el-option v-for="itm in dataList" :key="itm.id" :value="itm.id">
             {{ itm.label }}
-          </option>
-        </select>
+          </el-option>
+        </el-select>
       </label>
       <label>
         起始資金
-        <input v-model="startMoney" type="number" min="0" />
+        <el-input v-model="startMoney" type="number" min="0" />
       </label>
       <label>
         每月投資金額
-        <input v-model="investMoney" type="number" min="0" />
+        <el-input v-model="investMoney" type="number" min="0" />
       </label>
-      <label>
+      <!-- <label>
         平衡買進趴數
-        <input v-model="buyRate" type="number" min="0" />
+        <el-input v-model="buyRate" type="number" min="0" />
       </label>
       <label>
         平衡賣出趴數
-        <input v-model="saleRate" type="number" min="0" />
+        <el-input v-model="saleRate" type="number" min="0" />
       </label>
       <label>
         定期定額資金運用比例
-        <input v-model="depositRate" type="number" min="0" />
-      </label>
-      <button @click="getStockSimulation">模擬</button>
+        <el-input v-model="depositRate" type="number" min="0" />
+      </label> -->
+      <el-button
+        type="primary"
+        :style="{ width: '100%' }"
+        @click="handleSubmit(stock)"
+        >模擬</el-button
+      >
     </div>
-    <div>總投資金額： {{ totalInvest }}</div>
+    <hr />
+    <div v-if="fixedDepositList.length" :style="{ textAlign: 'center' }">
+      總投資金額： {{ totalInvest }}
+    </div>
+    <canvas
+      ref="myChartRef"
+      id="myChartRef"
+      v-if="fixedDepositList.length"
+    ></canvas>
     <div class="tables">
-      <!-- <div class="table">
+      <!-- <div class="table" v-if="twoCoinList.length">
         <p>雙幣理論</p>
         <StockDataTable :stockList="twoCoinList" />
       </div> -->
-      <div class="table">
-        <p>每月定存</p>
+      <div class="table" v-if="fixedDepositList.length">
         <StockDataTable :stockList="fixedDepositList" />
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .app {
   padding: 10px;
+  max-width: 1000px;
+  margin: auto;
 }
-.form {
-  margin-bottom: 20px;
+.compare {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  .el-select {
+    flex: 1;
+  }
+}
+hr {
+  margin: 20px 0;
 }
 .form label {
-  display: block;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  .el-input,
+  .el-select {
+    flex: 1;
+  }
 }
 .form label + label {
   margin-top: 10px;
@@ -268,9 +445,15 @@ function formatStockAmount(number, fixed) {
   margin-top: 10px;
 }
 .tables {
-  display: flex;
+  // display: flex;
+  // justify-content: center;
+  // align-items: flex-start;
+  margin-top: 20px;
 }
 .tables .table + .table {
   margin-left: 20px;
+}
+#stocksRef {
+  margin-bottom: 20px;
 }
 </style>
