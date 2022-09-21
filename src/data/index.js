@@ -15,27 +15,53 @@ import prize2882 from '@/data/prize2882.json';
 import prize2883 from '@/data/prize2883.json';
 import prize2884 from '@/data/prize2884.json';
 import prize2886 from '@/data/prize2886.json';
+import prize2892 from '@/data/prize2892.json';
 import prize1513 from '@/data/prize1513.json';
 import prize8069 from '@/data/prize8069.json';
+import prize5880 from '@/data/prize5880.json';
 
 const stockList = [
+  {
+    id: '2886',
+    label: '2886 兆豐金',
+    list: prize2886.prize.reverse(),
+    cashDividend: prize2886.cashDividend,
+  },
+  {
+    id: '5880',
+    label: '5880 合庫金',
+    list: prize5880.prize.reverse(),
+    cashDividend: prize5880.cashDividend,
+  },
+  {
+    id: '2892',
+    label: '2892 第一金',
+    list: prize2892.prize.reverse(),
+    cashDividend: prize2892.cashDividend,
+  },
+  {
+    id: '2880',
+    label: '2880 華南金',
+    list: prize2880.prize.reverse(),
+    cashDividend: prize2880.cashDividend,
+  },
+  {
+    id: '2812',
+    label: '2812 台中銀',
+    list: prize2812.prize.reverse(),
+    cashDividend: prize2812.cashDividend,
+  },
+  {
+    id: '2834',
+    label: '2834 台企銀',
+    list: prize2834.prize.reverse(),
+    cashDividend: prize2834.cashDividend,
+  },
   {
     id: '0056',
     label: '0056 元大高股息',
     list: prize0056.prize.reverse(),
     cashDividend: prize0056.cashDividend,
-  },
-  {
-    id: '0052',
-    label: '0052 富邦科技',
-    list: prize0052.prize.reverse(),
-    cashDividend: prize0052.cashDividend,
-  },
-  {
-    id: '0055',
-    label: '0055 元大MSCI金融',
-    list: prize0055.prize.reverse(),
-    cashDividend: prize0055.cashDividend,
   },
   {
     id: '0050',
@@ -49,6 +75,24 @@ const stockList = [
     label: '00878 國泰永續高股息',
     list: prize00878.prize.reverse(),
     cashDividend: prize00878.cashDividend,
+  },
+  {
+    id: '0052',
+    label: '0052 富邦科技',
+    list: prize0052.prize.reverse(),
+    cashDividend: prize0052.cashDividend,
+  },
+  {
+    id: '006208',
+    label: '006208 富邦台50',
+    list: prize006208.prize.reverse(),
+    cashDividend: prize006208.cashDividend,
+  },
+  {
+    id: '0055',
+    label: '0055 元大MSCI金融',
+    list: prize0055.prize.reverse(),
+    cashDividend: prize0055.cashDividend,
   },
   {
     id: '00713',
@@ -67,30 +111,6 @@ const stockList = [
     label: '006203 元大MSCI台灣',
     list: prize006203.prize.reverse(),
     cashDividend: prize006203.cashDividend,
-  },
-  {
-    id: '006208',
-    label: '006208 富邦台50',
-    list: prize006208.prize.reverse(),
-    cashDividend: prize006208.cashDividend,
-  },
-  {
-    id: '2812',
-    label: '2812 台中銀',
-    list: prize2812.prize.reverse(),
-    cashDividend: prize2812.cashDividend,
-  },
-  {
-    id: '2834',
-    label: '2834 台企銀',
-    list: prize2834.prize.reverse(),
-    cashDividend: prize2834.cashDividend,
-  },
-  {
-    id: '2880',
-    label: '2880 華南金',
-    list: prize2880.prize.reverse(),
-    cashDividend: prize2880.cashDividend,
   },
   {
     id: '2881',
@@ -116,12 +136,7 @@ const stockList = [
     list: prize2884.prize.reverse(),
     cashDividend: prize2884.cashDividend,
   },
-  {
-    id: '2886',
-    label: '2886 兆豐金',
-    list: prize2886.prize.reverse(),
-    cashDividend: prize2886.cashDividend,
-  },
+
   {
     id: '1513',
     label: '1513 中興電',
