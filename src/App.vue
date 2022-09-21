@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, watchEffect, nextTick } from 'vue';
+import { ref, watch, computed, watchEffect, nextTick } from 'vue';
 import Chart from 'chart.js/auto';
 import dataList from '@/data';
 import StockDataTable from '@/components/StockDataTable.vue';
@@ -10,18 +10,71 @@ const stock = ref('0056');
 const comparisonStocks = ref(['0050', '0056']);
 const twoCoinList = ref([]);
 const fixedDepositList = ref([]);
-const startMoney = ref(300000);
-const investMoney = ref(30000);
+const startMoneyInput = ref(300000);
+const investMoneyInput = ref(30000);
 const buyRate = ref(0.05);
 const saleRate = ref(0.05);
 const totalInvest = ref(0);
 const depositRate = ref(1);
+const startMoney = computed(() => +startMoneyInput.value);
+const investMoney = computed(() => +investMoneyInput.value);
 
 let chart = null;
 let comparisonStocksChart = null;
 
 watch(stocksRef, (newValue, oldValue) => {
   if (newValue !== oldValue) setComparisonStocks();
+});
+
+watchEffect(async () => {
+  if (!fixedDepositList.value.length && !twoCoinList.length) return;
+  await nextTick();
+  if (chart) chart.destroy();
+  chart = new Chart(myChartRef.value, {
+    type: 'line',
+    data: {
+      labels: fixedDepositList.value.map((itm) => itm.date).reverse(),
+      datasets: [
+        {
+          label: '股票總價值',
+          backgroundColor: 'rgb(255, 99, 132)',
+          borderColor: 'rgb(255, 99, 132)',
+          data: fixedDepositList.value.map((itm) => itm.totalMoney).reverse(),
+          yAxisID: 'y',
+        },
+        {
+          label: '股價',
+          backgroundColor: 'rgb(25, 99, 255)',
+          borderColor: 'rgb(25, 99, 255)',
+          data: fixedDepositList.value.map((itm) => itm.prize).reverse(),
+          yAxisID: 'y1',
+        },
+        {
+          label: '總投入資金',
+          backgroundColor: 'rgb(100, 100, 100)',
+          borderColor: 'rgb(100, 100, 100)',
+          data: fixedDepositList.value.map((itm) => itm.investMoney).reverse(),
+          yAxisID: 'y',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: dataList.find((itm) => itm.id === stock.value).label,
+        },
+      },
+    },
+  });
 });
 
 function setComparisonStocks() {
@@ -76,57 +129,6 @@ function setComparisonStocks() {
     },
   });
 }
-
-watchEffect(async () => {
-  if (!fixedDepositList.value.length && !twoCoinList.length) return;
-  await nextTick();
-  if (chart) chart.destroy();
-  chart = new Chart(myChartRef.value, {
-    type: 'line',
-    data: {
-      labels: fixedDepositList.value.map((itm) => itm.date).reverse(),
-      datasets: [
-        {
-          label: '股票總價值',
-          backgroundColor: 'rgb(255, 99, 132)',
-          borderColor: 'rgb(255, 99, 132)',
-          data: fixedDepositList.value.map((itm) => itm.totalMoney).reverse(),
-          yAxisID: 'y',
-        },
-        {
-          label: '股價',
-          backgroundColor: 'rgb(25, 99, 255)',
-          borderColor: 'rgb(25, 99, 255)',
-          data: fixedDepositList.value.map((itm) => itm.prize).reverse(),
-          yAxisID: 'y1',
-        },
-        {
-          label: '總投入資金',
-          backgroundColor: 'rgb(100, 100, 100)',
-          borderColor: 'rgb(100, 100, 100)',
-          data: fixedDepositList.value.map((itm) => itm.investMoney).reverse(),
-          yAxisID: 'y',
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
-      plugins: {
-        legend: {
-          position: 'top',
-        },
-        title: {
-          display: true,
-          text: dataList.find((itm) => itm.id === stock.value).label,
-        },
-      },
-    },
-  });
-});
 
 function getStockSimulation(stockId) {
   let money = startMoney.value;
@@ -223,7 +225,7 @@ function getStockSimulation(stockId) {
       nowMonth = month;
       money += investMoney.value;
       totalInvest.value += investMoney.value;
-      if (!investMoney.value) return;
+      if (typeof investMoney.value !== 'number') return;
       fixedDepositMoney += investMoney.value * (1 - fixedDepositMoneyRate);
       fixedDepositStockAmount += formatStockAmount(
         (investMoney.value * fixedDepositMoneyRate) / (prize * 1000)
@@ -365,11 +367,11 @@ function formatStockAmount(number, fixed) {
       </label>
       <label>
         起始資金
-        <el-input v-model="startMoney" type="number" min="0" />
+        <el-input v-model="startMoneyInput" type="number" min="0" />
       </label>
       <label>
         每月投資金額
-        <el-input v-model="investMoney" type="number" min="0" />
+        <el-input v-model="investMoneyInput" type="number" min="0" />
       </label>
       <!-- <label>
         平衡買進趴數
