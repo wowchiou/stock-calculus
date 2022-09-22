@@ -1,8 +1,9 @@
 <script setup>
 import { ref, watch, computed, watchEffect, nextTick } from 'vue';
-import Chart from 'chart.js/auto';
+import { Chart, registerables } from 'chart.js';
 import dataList from '@/data';
 import StockDataTable from '@/components/StockDataTable.vue';
+Chart.register(...registerables);
 
 const myChartRef = ref(null);
 const stocksRef = ref(null);
