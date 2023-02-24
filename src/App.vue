@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed, watchEffect, nextTick } from 'vue';
+import { ref, reactive, watch, computed, watchEffect, nextTick } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import dataList from '@/data';
 import StockDataTable from '@/components/StockDataTable.vue';
@@ -19,9 +19,20 @@ const totalInvest = ref(0);
 const depositRate = ref(1);
 const startMoney = computed(() => +startMoneyInput.value);
 const investMoney = computed(() => +investMoneyInput.value);
+const direction = reactive({
+  x: 0,
+  y: 0,
+  z: 0,
+});
 
 let chart = null;
 let comparisonStocksChart = null;
+
+window.addEventListener('deviceorientation', (event) => {
+  direction.z = event.alpha; // 繞Z軸旋轉角度
+  direction.x = event.beta; // 繞X軸旋轉角度
+  direction.y = event.gamma; // 繞Y軸旋轉角度
+});
 
 watch(stocksRef, (newValue, oldValue) => {
   if (newValue !== oldValue) setComparisonStocks();
@@ -338,6 +349,9 @@ function formatStockAmount(number, fixed) {
 
 <template>
   <div class="app">
+    <div>
+      x: {{ direction.x }} ; y: {{ direction.y }} ; z: {{ direction.z }}
+    </div>
     <div class="compare">
       <p>欲比較股票</p>
       <el-select
